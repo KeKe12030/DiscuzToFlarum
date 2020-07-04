@@ -18,7 +18,16 @@ Discuz站点：<https://bbs.mcplugin.cn>
 Flarum站点：<http://test.mcplugin.cn>
 
 ### 我该如何使用它？
-+ 下载Jar包之后，配置好JDBC的Java驱动，输入 `java -jar jar包名.jar` 即可运行
++ 下载源码之后，配置好JDBC的Java驱动，最好是导入到一些开发软件（Eclipse或者IDEA都行）
++ 找到`sql.properties`，根据里面的提示自行配置好您的配置文件
++ 配置好flarum的discussion_id和discuz的板块ID即可（因为没做DZ和FL的板块对照表，所以帖子转换只能一次转换一个板块）
+`ids`数组是flarum的分类id，可以多个，所以是数组
+`fid`是discuz的板块id，只能是一个。
+
+![image.png](https://pic.rmb.bdstatic.com/bjh/b0cf3a2461898912940221a28fe4f3eb.png)
+
+
++ 一切diy好了以后，导出您自定义好的Jar包，然后再cmd输入 `java -jar jar包名.jar` 即可运行
 
 ### 目前D2F实现的功能
 + 转移Discuz用户的邮箱、注册时间、回复内容、头像   （密码无法迁移怎么办？别着急，接着往下看）
@@ -67,3 +76,5 @@ Flarum站点：<http://test.mcplugin.cn>
 ![image.png](https://pic.rmb.bdstatic.com/bjh/cc8135047e0c1167cf28743efaca7221.png)
 
 ![image.png](https://pic.rmb.bdstatic.com/bjh/cf0145231f041815d2092877141b151a.png)
+
+![image.png](https://pic.rmb.bdstatic.com/bjh/f7479c464e89443953fa2f53f44fecc8.png)
