@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 import java.util.Vector;
 
@@ -14,9 +15,11 @@ public class DiscuzSQLUtil {
 	public static Connection discuzCon = null;
 	public static String discuzStartName = null;
 	public static String ucAddress = null;
+	public static boolean replaceStr = false;
 	static {
 		discuzStartName = getConfig("discuzStartName");
 		ucAddress  = getConfig("ucserverAddress");
+		replaceStr = Boolean.valueOf(getConfig("replaceStrs"));//是否开启转换特殊字符串
 	}
 	public DiscuzSQLUtil(){
 		try {
@@ -52,7 +55,7 @@ public class DiscuzSQLUtil {
 	}
 	
 	private static String getConfig(String paramName) {//参数传入需要读取的内容前缀
-		ResourceBundle resource = ResourceBundle.getBundle("sql");//config.properties 在src
+		ResourceBundle resource = ResourceBundle.getBundle("config");//config.properties 在src
 		String value = "";
 		try {
 			value = resource.getString(paramName);  
@@ -65,13 +68,13 @@ public class DiscuzSQLUtil {
 	/**
 	 * 获取所有主题的TID
 	 * */
-	public static Vector<Integer> getAllThreadTids(int fid) {
+	public static Vector<Integer> getAllThreadTids() {
 		Vector<Integer> pids = new Vector<Integer>();
 		Statement s = null;
 		ResultSet rs = null;
 		try {
 			s = discuzCon.createStatement();
-			rs = s.executeQuery("SELECT distinct `tid` FROM `"+discuzStartName+"forum_thread` WHERE fid="+fid+" AND `displayorder`>-1;");
+			rs = s.executeQuery("SELECT distinct `tid` FROM `"+discuzStartName+"forum_thread` WHERE `fid`=51 AND `displayorder`>-1;");
 			while(rs.next()) {
 				pids.add(rs.getInt(1));
 			}
@@ -201,7 +204,7 @@ public class DiscuzSQLUtil {
 				e.printStackTrace();
 			}
 		}
-		return new Timestamp(registerTime*10000);//转换为毫秒
+		return new Timestamp(registerTime*1000);//转换为毫秒
 	}
 	/**
 	 * 通过TID获取最后一次的回复的时间
@@ -235,13 +238,13 @@ public class DiscuzSQLUtil {
 	/**
 	 * 获取所有回复的PID
 	 * */
-	public static Vector<Integer> getAllReplyPids(int fid) {
+	public static Vector<Integer> getAllReplyPids() {
 		Vector<Integer> pids = new Vector<Integer>();
 		Statement s = null;
 		ResultSet rs = null;
 		try {
 			s = discuzCon.createStatement();
-			rs = s.executeQuery("SELECT `pid` FROM `"+discuzStartName+"forum_post` WHERE fid="+fid+" AND `position`>1;");
+			rs = s.executeQuery("SELECT `pid` FROM `"+discuzStartName+"forum_post` WHERE `fid`=51 AND `position`>1;");
 			while(rs.next()) {
 				pids.add(rs.getInt(1));
 			}
@@ -459,7 +462,7 @@ public class DiscuzSQLUtil {
 	/**
 	 * 通过PID获取发表时间，并且转换成Flarum适合的时间格式
 	 * */
-	public static Date getPostTimeByPid(int pid) {
+	public static Timestamp getPostTimeByPid(int pid) {
 		Statement s = null;
 		ResultSet rs = null;
 		Long timestmap = 0L;
@@ -483,7 +486,7 @@ public class DiscuzSQLUtil {
 				e.printStackTrace();
 			}
 		}
-		return new Date(timestmap*10000L);
+		return new Timestamp(timestmap*1000L);
 	}
 	/**
 	 * 通过TID获取发帖时间，并且转换成Flarum适合的时间格式
@@ -575,8 +578,8 @@ public class DiscuzSQLUtil {
 	/**
 	 * 通过TID获取帖子的FID(所在版块ID)并且转换为FL的TAGID
 	 * */
-	public static int[] getIdByFid(int fid) {
-		return Main.ids;
+	public static ArrayList<Integer> getIdByFid(int fid) {
+		return TrainUtil.discuzIdToFlarumId(fid);
 	}
 	/**
 	 * 通过TID获取帖子一共有几个回复
@@ -749,5 +752,29 @@ public class DiscuzSQLUtil {
 			}
 		}
 		return participant;
+	}
+	public static int getFidByPid(int tid) {
+		Statement s = null;
+		ResultSet rs = null;
+		try {
+			s = discuzCon.createStatement();
+			rs = s.executeQuery("SELECT `fid` FROM `"+discuzStartName+"forum_thread` WHERE tid="+tid+";");
+			while(rs.next()) {
+				return rs.getInt(1);
+			}
+			//获得可以正常显示的TID
+		} catch (SQLException e) {
+			// TODO 自动生成的 catch 块
+			e.printStackTrace();
+		}finally {
+			try {
+				rs.close();
+				s.close();
+			} catch (SQLException e) {
+				// TODO 自动生成的 catch 块
+				e.printStackTrace();
+			}
+		}
+		return -1;
 	}
 }

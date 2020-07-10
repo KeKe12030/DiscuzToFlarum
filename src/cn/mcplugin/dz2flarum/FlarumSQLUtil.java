@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 import java.util.Vector;
 
@@ -26,7 +27,7 @@ public class FlarumSQLUtil {
 
 	}
 	private static String getConfig(String paramName) {//参数传入需要读取的内容前缀
-		ResourceBundle resource = ResourceBundle.getBundle("sql");//config.properties 在src
+		ResourceBundle resource = ResourceBundle.getBundle("config");//config.properties 在src
 		String value = "";
 		try {
 			value = resource.getString(paramName);  
@@ -91,7 +92,7 @@ public class FlarumSQLUtil {
 	/**
 	 * 插入DZ帖子转换为FL帖子
 	 * */
-	public static void insertTranThread(int pid,int tid,int[] ids,String title,String message,Timestamp postTime,int authorid ) {
+	public static void insertTranThread(int pid,int tid,ArrayList<Integer> ids,String title,String message,Timestamp postTime,int authorid ) {
 		PreparedStatement s = null;
 		try {
 			s = flarumCon.prepareStatement("INSERT INTO `"+flarumStartName+"discussions` (`id`, `title`, `comment_count`, `participant_count`, `post_number_index`, `created_at`, `user_id`, `first_post_id`, `last_posted_at`, `last_posted_user_id`, `last_post_id`, `last_post_number`, `hidden_at`, `hidden_user_id`, `slug`, `is_private`, `is_approved`, `view_count`, `is_locked`, `is_sticky`) VALUES ('"+tid+"', \""+title+"\", '1', '1', '1', ?, '"+authorid+"', '"+pid+"', NULL, NULL, NULL, NULL, NULL, NULL, '', '0', '1', '0', '0', '0')");
@@ -108,8 +109,8 @@ public class FlarumSQLUtil {
 
 			//插入帖子分类discussion_tag
 			s = flarumCon.prepareStatement("INSERT INTO `"+flarumStartName+"discussion_tag` (`discussion_id`, `tag_id`) VALUES ('"+tid+"', ?)");
-			for(int q=0;q<ids.length;q++) {
-				s.setInt(1, ids[q]);
+			for(int q=0;q<ids.size();q++) {
+				s.setInt(1, ids.get(q));
 				s.addBatch();
 			}
 			s.executeBatch();
@@ -133,12 +134,12 @@ public class FlarumSQLUtil {
 	/**
 	 * 插入DZ回复为FL回复
 	 * */
-	public static void insertTranReply(int pid,int targetTid,int position,Date postTime,int authorid,String message) {
+	public static void insertTranReply(int pid,int targetTid,int position,Timestamp postTime,int authorid,String message) {
 		PreparedStatement s = null;
 		try {
 			s = flarumCon.prepareStatement("INSERT INTO `"+flarumStartName+"posts` (`discussion_id`, `number`, `created_at`, `user_id`, `type`, `content`, `edited_at`, `edited_user_id`, `hidden_at`, `hidden_user_id`, `ip_address`, `is_private`, `is_approved`) VALUES ('"+targetTid+"', '"+position+"', ?, '"+authorid+"', 'comment', ?, NULL, NULL, NULL, NULL, NULL, '0', '1')");
 			//插入帖子内容
-			s.setDate(1, postTime);
+			s.setTimestamp(1, postTime);
 			s.setString(2, message);
 			s.executeUpdate();
 			//插入标题
@@ -215,11 +216,20 @@ public class FlarumSQLUtil {
 	/**
 	 * 转换帖子
 	 * */
-	public static void transformationThread(int fid) {
-		Vector<Integer> tids = DiscuzSQLUtil.getAllThreadTids(fid);
+	public static void transformationThread() {
+		Vector<Integer> tids = DiscuzSQLUtil.getAllThreadTids();
 		for(int tid : tids) {
 			int pid = DiscuzSQLUtil.getPidByTid(tid);
-			int[] ids = DiscuzSQLUtil.getIdByFid(fid);
+			int fid = DiscuzSQLUtil.getFidByPid(tid);
+			if(fid==-1) {
+				System.out.println("[错误][WARNNING] 在tid为"+tid+"的帖子转换失败！！");
+				continue;
+			}
+			ArrayList<Integer> ids = DiscuzSQLUtil.getIdByFid(fid);
+			if(ids == null || ids.size()<=0) {
+	    		System.out.println("[错误][WARNNING] Discuz板块ID为："+fid+"的板块配置错误！\n请检查您的ids.yml配置文件！");
+	    		continue;
+	    	}
 			String title = DiscuzSQLUtil.getTitleByTid(tid);
 			String message = DiscuzSQLUtil.getMessageByTid(tid);
 			Timestamp postTime = DiscuzSQLUtil.getPostTimeByTid(tid);
@@ -231,12 +241,12 @@ public class FlarumSQLUtil {
 	/**
 	 * 转换回复
 	 * */
-	public static void transformationReply(int fid) {
-		Vector<Integer> pids = DiscuzSQLUtil.getAllReplyPids(fid);
+	public static void transformationReply() {
+		Vector<Integer> pids = DiscuzSQLUtil.getAllReplyPids();
 		for(int pid : pids) {
 			int targetTid = DiscuzSQLUtil.getTargetTidByReplyPid(pid);
 			int position = DiscuzSQLUtil.getReplyPositionByReplyPid(pid);
-			Date postTime = DiscuzSQLUtil.getPostTimeByPid(pid);
+			Timestamp postTime = DiscuzSQLUtil.getPostTimeByPid(pid);
 			String message = DiscuzSQLUtil.getMessageByPid(pid);
 			int authorid = DiscuzSQLUtil.getAuthorIdByPid(pid);
 			insertTranReply(pid, targetTid, position, postTime, authorid, message);
@@ -290,7 +300,7 @@ public class FlarumSQLUtil {
 		Vector<Integer> uids = DiscuzSQLUtil.getAllUids();
 		System.out.println("uids.size:"+uids.size());
 		for(int uid:uids) {
-			if(uid!=1) {
+//			if(uid!=1) {
 				String name = DiscuzSQLUtil.getNameByUid(uid);
 				System.out.println("正在转换用户  ——> UID："+uid+" 昵称："+name);
 				String email = DiscuzSQLUtil.getEmailByUid(uid);
@@ -307,15 +317,15 @@ public class FlarumSQLUtil {
 					}
 				}
 				insertUser(uid, name, email,avatarUrl,registerTime);//通过网络URL存入头像的用户
-			}
+//			}
 		}
 
 	}
 	/**
 	 * 更新每一个帖子的信息，如最后回帖时间，回帖数目等
 	 * */
-	public static void transformationThreadInfo(int fid) {
-		Vector<Integer> tids = DiscuzSQLUtil.getAllThreadTids(fid);
+	public static void transformationThreadInfo() {
+		Vector<Integer> tids = DiscuzSQLUtil.getAllThreadTids();
 		for(int tid : tids) {
 			Timestamp lastReplyTime = DiscuzSQLUtil.getLastReplyTimeByTid(tid);
 			int views = DiscuzSQLUtil.getViewNumByTid(tid);
