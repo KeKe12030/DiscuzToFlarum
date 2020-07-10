@@ -14,7 +14,7 @@
 ---
 
 ### 待修复BUG：
-+ 时间错乱，时间戳计算BUG，有空去改。咕咕咕
+~~+ 时间错乱，时间戳计算BUG，有空去改。咕咕咕~~[已修复]
 
 ---
 
@@ -33,14 +33,8 @@ Flarum站点：<http://test.mcplugin.cn>
 
 ### 我该如何使用它？
 + 下载源码之后，配置好JDBC的Java驱动，最好是导入到一些开发软件（Eclipse或者IDEA都行）
-+ 找到`sql.properties`，根据里面的提示自行配置好您的配置文件
-+ 配置好flarum的discussion_id和discuz的板块ID即可（因为没做DZ和FL的板块对照表，所以帖子转换只能一次转换一个板块）
-`ids`数组是flarum的分类id，可以多个，所以是数组
-`fid`是discuz的板块id，只能是一个。
-
-![image.png](https://pic.rmb.bdstatic.com/bjh/b0cf3a2461898912940221a28fe4f3eb.png)
-
-
++ 找到`config.properties`，根据里面的提示自行配置好您的配置文件
++ 在`ids.yml`里配置好flarum的discussion_id和discuz的板块ID即可
 + 一切diy好了以后，导出您自定义好的Jar包，然后再cmd输入 `java -jar jar包名.jar` 即可运行
 
 ### 目前D2F实现的功能
