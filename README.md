@@ -66,6 +66,9 @@ Flarum站点：<http://test.mcplugin.cn>
 
 ![image.png](https://pic.rmb.bdstatic.com/bjh/1b488dd2fce1d85c6d0651fad9afa137.png)
 
+#### 2.转换好慢啊，效率低，我论坛数据多怎么办？
+现在只是测试版，效率很低，建议等后续版本。
+
 ---
 
 #### 作者的一些留言：
