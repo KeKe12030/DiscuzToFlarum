@@ -74,7 +74,7 @@ public class DiscuzSQLUtil {
 		ResultSet rs = null;
 		try {
 			s = discuzCon.createStatement();
-			rs = s.executeQuery("SELECT distinct `tid` FROM `"+discuzStartName+"forum_thread` WHERE `fid`=51 AND `displayorder`>-1;");
+			rs = s.executeQuery("SELECT distinct `tid` FROM `"+discuzStartName+"forum_thread` WHERE `displayorder`>-1;");
 			while(rs.next()) {
 				pids.add(rs.getInt(1));
 			}
@@ -244,7 +244,7 @@ public class DiscuzSQLUtil {
 		ResultSet rs = null;
 		try {
 			s = discuzCon.createStatement();
-			rs = s.executeQuery("SELECT `pid` FROM `"+discuzStartName+"forum_post` WHERE `fid`=51 AND `position`>1;");
+			rs = s.executeQuery("SELECT `pid` FROM `"+discuzStartName+"forum_post` WHERE `position`>1;");
 			while(rs.next()) {
 				pids.add(rs.getInt(1));
 			}
