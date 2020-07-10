@@ -34,6 +34,8 @@ Flarum站点：<http://test.mcplugin.cn>
 ### 我该如何使用它？
 + 下载源码之后，配置好JDBC的Java驱动，最好是导入到一些开发软件（Eclipse或者IDEA都行）
 + 找到`config.properties`，根据里面的提示自行配置好您的配置文件
++ 在`replace.yml`里配置好你需要替换的文字（如果有需要）
+![image.png](https://pic.rmb.bdstatic.com/bjh/fa7e672453454d9eca701c089d8f2371.png)
 + 在`ids.yml`里配置好flarum的discussion_id和discuz的板块ID即可
 + 一切diy好了以后，导出您自定义好的Jar包，然后再cmd输入 `java -jar jar包名.jar` 即可运行
 
