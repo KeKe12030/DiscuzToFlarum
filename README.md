@@ -35,7 +35,7 @@ Discuz站点：<https://bbs.mcplugin.cn>
 Flarum站点：<http://test.mcplugin.cn>
 
 ### 目前D2F实现的功能
-+ 转移Discuz用户的邮箱、注册时间、回复内容、头像   （密码无法迁移怎么办？别着急，接着往下看）
++ 转移Discuz用户的邮箱、注册时间、回复内容、头像   （密码无法迁移怎么办？看我上面的博客教程里写了）
 + 讲指定fid（Discuz论坛版块ID）中的帖子，转移到对应的discussion_id当中（Flarum的板块ID）
 目前帖子仅支持` `displayorder`>-1 `（即可以被展示的帖子，被删除的帖子暂不支持）
 + 帖子只有帖子内容、作者、阅览量、、回复的迁移（预计未来版本添加帖子附件的转化）
